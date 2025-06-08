@@ -26,12 +26,12 @@ def download_audio():
         return
 
     # Disable download button during download
-    download_btn.config(state='disabled')
+    download_btn.config(state='disabled', bg='#666666')
     progress_bar.start()
     
     def download_thread():
         try:
-            update_status("Preparing download...")
+            update_status("🔍 Analyzing video and preparing download...")
             
             # Construct output template
             output_template = os.path.join(path, "%(title)s.%(ext)s")
@@ -47,21 +47,21 @@ def download_audio():
                 url
             ]
 
-            update_status("Downloading and converting audio...")
+            update_status("⬇️ Downloading and converting audio...")
             subprocess.run(cmd, check=True)
             
-            update_status("Download completed successfully!")
-            messagebox.showinfo("Success", f"Download completed and saved to:\n{path}")
+            update_status("✅ Download completed successfully!")
+            messagebox.showinfo("Success", f"🎉 Download completed and saved to:\n{path}")
             
         except subprocess.CalledProcessError as e:
-            update_status("Download failed - check URL or yt-dlp setup")
+            update_status("❌ Download failed - check URL or yt-dlp setup")
             messagebox.showerror("Error", "Download failed. Check the URL or yt-dlp setup.")
         except Exception as e:
-            update_status(f"Error: {str(e)}")
+            update_status(f"❌ Error: {str(e)}")
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
         finally:
-            # Re-enable download button and stop progress bar
-            download_btn.config(state='normal')
+            # Re-enable download button
+            download_btn.config(state='normal', bg='#ef4444')
             progress_bar.stop()
     
     # Run download in separate thread to prevent UI freezing
@@ -72,98 +72,153 @@ def download_audio():
 # GUI Setup
 root = tk.Tk()
 root.title("YouTube Audio Downloader")
-root.geometry("800x600")
-root.configure(bg='#f0f0f0')
+root.geometry("1100x900")
+root.configure(bg='#0a0a0a')
 
-# Configure style
+# Configure style for ttk widgets
 style = ttk.Style()
 style.theme_use('clam')
+style.configure('Dark.TCombobox', 
+                fieldbackground='#2a2a2a', 
+                background='#2a2a2a',
+                foreground='#ffffff',
+                arrowcolor='#ffffff',
+                bordercolor='#444444',
+                lightcolor='#2a2a2a',
+                darkcolor='#2a2a2a',
+                focuscolor='#22c55e')
+style.map('Dark.TCombobox',
+          fieldbackground=[('readonly', '#2a2a2a')],
+          selectbackground=[('readonly', '#22c55e')],
+          selectforeground=[('readonly', '#ffffff')])
+
 
 # Main container
-main_frame = tk.Frame(root, bg='#f0f0f0', padx=30, pady=20)
+main_frame = tk.Frame(root, bg='#0a0a0a', padx=35, pady=25)
 main_frame.pack(fill='both', expand=True)
 
-# Title
-title_label = tk.Label(main_frame, text="YouTube Audio Downloader", 
-                      font=('Helvetica', 18, 'bold'), 
-                      bg='#f0f0f0', fg='#333333')
-title_label.pack(pady=(0, 30))
+# Header with gradient effect
+header_frame = tk.Frame(main_frame, bg='#1a1a1a', height=120, relief='flat')
+header_frame.pack(fill='x', pady=(0, 25))
+header_frame.pack_propagate(False)
+
+title_label = tk.Label(header_frame, text="YouTube Audio Downloader", 
+                      font=('Segoe UI', 26, 'bold'), 
+                      bg='#1a1a1a', fg='#ffffff')
+title_label.pack(expand=True, pady=(15, 5))
+
+subtitle_label = tk.Label(header_frame, text="High-Quality Audio Downloads", 
+                         font=('Segoe UI', 12), 
+                         bg='#1a1a1a', fg='#dc2626')
+subtitle_label.pack(pady=(0, 15))
 
 # URL Section
-url_frame = tk.Frame(main_frame, bg='#f0f0f0')
-url_frame.pack(fill='x', pady=(0, 20))
+url_frame = tk.Frame(main_frame, bg='#1a1a1a', relief='flat')
+url_frame.pack(fill='x', pady=(0, 20), ipady=20, ipadx=25)
 
-tk.Label(url_frame, text="YouTube URL:", 
-         font=('Helvetica', 12, 'bold'), 
-         bg='#f0f0f0', fg='#333333').pack(anchor='w')
+url_label = tk.Label(url_frame, text="🔗 YouTube URL", 
+         font=('Segoe UI', 14, 'bold'), 
+         bg='#1a1a1a', fg='#dc2626')
+url_label.pack(anchor='w', pady=(0, 10))
 
-url_entry = tk.Entry(url_frame, width=70, font=('Helvetica', 11), 
-                    relief='solid', bd=1, highlightthickness=1,
-                    highlightcolor='#4a90e2')
-url_entry.pack(fill='x', pady=(5, 0), ipady=8)
+url_entry = tk.Entry(url_frame, font=('Segoe UI', 12), 
+                    relief='flat', bd=0, highlightthickness=2,
+                    highlightcolor='#dc2626', highlightbackground='#444444',
+                    bg='#2a2a2a', fg='#ffffff', insertbackground='#ffffff')
+url_entry.pack(fill='x', ipady=12)
 
 # Format Section
-format_frame = tk.Frame(main_frame, bg='#f0f0f0')
-format_frame.pack(fill='x', pady=(0, 20))
+format_frame = tk.Frame(main_frame, bg='#1a1a1a', relief='flat')
+format_frame.pack(fill='x', pady=(0, 20), ipady=20, ipadx=25)
 
-tk.Label(format_frame, text="Audio Format:", 
-         font=('Helvetica', 12, 'bold'), 
-         bg='#f0f0f0', fg='#333333').pack(anchor='w')
+format_label = tk.Label(format_frame, text="🎵 Audio Format", 
+         font=('Segoe UI', 14, 'bold'), 
+         bg='#1a1a1a', fg='#dc2626')
+format_label.pack(anchor='w', pady=(0, 10))
 
 format_var = tk.StringVar(value="mp3")
 format_menu = ttk.Combobox(format_frame, textvariable=format_var, 
-                          values=["mp3", "wav", "flac", "m4a"], 
-                          state="readonly", font=('Helvetica', 11))
-format_menu.pack(anchor='w', pady=(5, 0))
+                          values=["mp3", "wav", "flac", "m4a", "aac"], 
+                          state="readonly", font=('Segoe UI', 12),
+                          style='Dark.TCombobox', width=20)
+format_menu.pack(anchor='w')
 
 # Output Path Section
-path_frame = tk.Frame(main_frame, bg='#f0f0f0')
-path_frame.pack(fill='x', pady=(0, 20))
+path_frame = tk.Frame(main_frame, bg='#1a1a1a', relief='flat')
+path_frame.pack(fill='x', pady=(0, 25), ipady=20, ipadx=25)
 
-tk.Label(path_frame, text="Save To Folder:", 
-         font=('Helvetica', 12, 'bold'), 
-         bg='#f0f0f0', fg='#333333').pack(anchor='w')
+path_label = tk.Label(path_frame, text="📁 Save Location", 
+         font=('Segoe UI', 14, 'bold'), 
+         bg='#1a1a1a', fg='#dc2626')
+path_label.pack(anchor='w', pady=(0, 10))
 
-path_input_frame = tk.Frame(path_frame, bg='#f0f0f0')
-path_input_frame.pack(fill='x', pady=(5, 0))
+path_input_frame = tk.Frame(path_frame, bg='#1a1a1a')
+path_input_frame.pack(fill='x')
 
 output_path = tk.StringVar()
+# Set default to Desktop
+desktop_path = os.path.expanduser("~/Desktop")
+output_path.set(desktop_path)
+
 path_entry = tk.Entry(path_input_frame, textvariable=output_path, 
-                     font=('Helvetica', 11), relief='solid', bd=1,
-                     highlightthickness=1, highlightcolor='#4a90e2')
-path_entry.pack(side='left', fill='x', expand=True, ipady=8)
+                     font=('Segoe UI', 12), relief='flat', bd=0,
+                     highlightthickness=2, highlightcolor='#dc2626',
+                     highlightbackground='#444444', bg='#2a2a2a', 
+                     fg='#ffffff', insertbackground='#ffffff')
+path_entry.pack(side='left', fill='x', expand=True, ipady=12)
 
 browse_btn = tk.Button(path_input_frame, text="Browse", command=browse_folder,
-                      font=('Helvetica', 10, 'bold'), bg='#e6e6e6', fg='#333333',
-                      relief='solid', bd=1, padx=20, pady=8,
-                      activebackground='#d6d6d6')
-browse_btn.pack(side='right', padx=(10, 0))
+                      font=('Segoe UI', 11, 'bold'), bg='#444444', fg='#ffffff',
+                      relief='flat', bd=0, padx=25, pady=12,
+                      activebackground='#555555', cursor='hand2')
+browse_btn.pack(side='right', padx=(15, 0))
 
-# Download Button
-download_btn = tk.Button(main_frame, text="Download", command=download_audio,
-                        font=('Helvetica', 14, 'bold'), bg='#4a90e2', fg='white',
-                        relief='solid', bd=0, padx=40, pady=12,
-                        activebackground='#357abd', cursor='hand2')
-download_btn.pack(pady=(20, 20))
+# Download Button - Main CTA
+download_btn = tk.Button(main_frame, text="🚀 Download Audio", command=download_audio,
+                        font=('Segoe UI', 16, 'bold'), bg='#ef4444', fg='#ffffff',
+                        relief='flat', bd=0, padx=60, pady=18,
+                        activebackground='#dc2626', cursor='hand2')
+download_btn.pack(pady=(5, 20))
 
 # Progress Bar
-progress_bar = ttk.Progressbar(main_frame, mode='indeterminate', length=400)
-progress_bar.pack(pady=(0, 10))
+progress_bar = ttk.Progressbar(main_frame, mode='indeterminate', length=500)
+progress_bar.pack(pady=(0, 20))
 
 # Status Section
-status_frame = tk.Frame(main_frame, bg='#f0f0f0')
-status_frame.pack(fill='both', expand=True)
+status_frame = tk.Frame(main_frame, bg='#1a1a1a', relief='flat')
+status_frame.pack(fill='both', expand=True, ipady=20, ipadx=25)
 
-tk.Label(status_frame, text="Status:", 
-         font=('Helvetica', 12, 'bold'), 
-         bg='#f0f0f0', fg='#333333').pack(anchor='w')
+status_label = tk.Label(status_frame, text="📊 Status", 
+         font=('Segoe UI', 14, 'bold'), 
+         bg='#1a1a1a', fg='#dc2626')
+status_label.pack(anchor='w', pady=(0, 10))
 
-status_text = tk.Text(status_frame, height=8, font=('Consolas', 10),
-                     bg='#ffffff', fg='#333333', relief='solid', bd=1,
-                     wrap='word', state='disabled')
-status_text.pack(fill='both', expand=True, pady=(5, 0))
+status_text = tk.Text(status_frame, height=6, font=('JetBrains Mono', 11),
+                     bg='#0a0a0a', fg='#ffffff', relief='flat', bd=0,
+                     wrap='word', state='disabled', insertbackground='#ffffff',
+                     selectbackground='#dc2626', selectforeground='#ffffff')
+status_text.pack(fill='both', expand=True)
 
 # Initialize status
-update_status("Ready to download. Enter a YouTube URL and select your preferences.")
+update_status("🚀 Ready to download! Paste a YouTube URL above and hit Download.")
+
+# Add hover effects
+def on_enter_download(event):
+    download_btn.config(bg='#dc2626')
+
+def on_leave_download(event):
+    if download_btn['state'] != 'disabled':
+        download_btn.config(bg='#ef4444')
+
+def on_enter_browse(event):
+    browse_btn.config(bg='#555555')
+
+def on_leave_browse(event):
+    browse_btn.config(bg='#444444')
+
+download_btn.bind("<Enter>", on_enter_download)
+download_btn.bind("<Leave>", on_leave_download)
+browse_btn.bind("<Enter>", on_enter_browse)
+browse_btn.bind("<Leave>", on_leave_browse)
 
 root.mainloop()
